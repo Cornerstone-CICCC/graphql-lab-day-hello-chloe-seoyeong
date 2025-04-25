@@ -1,33 +1,69 @@
+import customerController from "../controllers/customer.controller";
+import orderController from "../controllers/order.controller";
+import productController from "../controllers/product.controller";
+import { ICustomer } from "../types/customer";
+import { IProduct } from "../types/product";
+
 // Finish the resolvers
 export const resolvers = {
   Query: {
-    products: () => {},
-    customers: () => {},
-    orders: () => {},
-    getProductById: () => {},
-    getCustomerById: () => {},
+    products: async () => await productController.allProducts(),
+    customers: async () => await customerController.allCustomers(),
+    orders: async () => await orderController.allOrders(),
+    getProductById: async (_: unknown, { id }: { id: string }) =>
+      await productController.findProduct(id),
+    getCustomerById: async (_: unknown, { id }: { id: string }) =>
+      await customerController.findCustomer(id),
   },
   Product: {
-    customers: () => {}
+    customers: () => {},
   },
   Customer: {
-    products: () => {}
+    products: () => {},
   },
   Order: {
     product: () => {},
-    customer: () => {}
+    customer: () => {},
   },
   Mutation: {
-    addProduct: () => {},
-    editProduct: () => {},
-    removeProduct: () => {},
+    addProduct: async (
+      _: unknown,
+      { productName, productPrice }: Omit<IProduct, "id" | "customers">
+    ) => await productController.addProduct({ productName, productPrice }),
+    editProduct: async (
+      _: unknown,
+      { id, productName, productPrice }: IProduct
+    ) =>
+      await productController.updateProduct(id, { productName, productPrice }),
+    removeProduct: async (_: unknown, { id }: { id: string }) =>
+      await productController.deleteProduct(id),
 
-    addCustomer: () => {},
-    editCustomer: () => {},
-    removeCustomer: () => {},
+    addCustomer: async (
+      _: unknown,
+      { firstName, lastName, email }: Omit<ICustomer, "id" | "product">
+    ) =>
+      await customerController.createCustomer({
+        firstName,
+        lastName,
+        email,
+      }),
+    editCustomer: async (
+      _: unknown,
+      { id, firstName, lastName, email }: ICustomer
+    ) =>
+      await customerController.updateCustomer(id, {
+        firstName,
+        lastName,
+        email,
+      }),
+    removeCustomer: async (_: unknown, { id }: { id: string }) =>
+      await customerController.deleteCustomer(id),
 
-    addOrder: () => {},
+    addOrder: async (
+      _: unknown,
+      { productId, customerId }: { productId: string; customerId: string }
+    ) => await orderController.createOrder({ productId, customerId }),
     editOrder: () => {},
-    removeOrder: () => {}
-  }
-}
+    removeOrder: () => {},
+  },
+};
